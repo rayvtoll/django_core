@@ -1,0 +1,10 @@
+asgiref
+Django
+django-filter
+django-oauth-toolkit
+djangorestframework
+Markdown
+python-decouple
+pytz
+sqlparse
+typing_extensions

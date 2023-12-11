@@ -1,0 +1,1 @@
+rm -rf manage.py venv project

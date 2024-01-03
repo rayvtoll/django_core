@@ -13,14 +13,6 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from project.settings import (
-    KEYCLOAK_SERVER_URL,
-    KEYCLOAK_CLIENT_ID,
-    KEYCLOAK_REALM_NAME,
-    KEYCLOAK_CLIENT_SECRET_KEY,
-    KEYCLOAK_ROLE_IS_ACTIVE,
-)
-
 
 class KeycloakAuthRolesMixin:
     def dispatch(self, request, *args, **kwargs):
@@ -46,7 +38,7 @@ class KeycloakAuthRolesMixin:
         if hasattr(self, "keycloak_roles") and not all(
             i
             in self.access_token_info.get("resource_access", {})
-            .get(KEYCLOAK_CLIENT_ID, {})
+            .get(settings.KEYCLOAK_CLIENT_ID, {})
             .get("roles", [])
             for i in self.keycloak_roles.get(request.method, [])
         ):
@@ -63,10 +55,10 @@ class Login(APIView):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.keycloak_client = KeycloakOpenID(
-            server_url=KEYCLOAK_SERVER_URL,
-            client_id=KEYCLOAK_CLIENT_ID,
-            realm_name=KEYCLOAK_REALM_NAME,
-            client_secret_key=KEYCLOAK_CLIENT_SECRET_KEY,
+            server_url=settings.KEYCLOAK_SERVER_URL,
+            client_id=settings.KEYCLOAK_CLIENT_ID,
+            realm_name=settings.KEYCLOAK_REALM_NAME,
+            client_secret_key=settings.KEYCLOAK_CLIENT_SECRET_KEY,
         )
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
@@ -78,7 +70,7 @@ class Login(APIView):
             access_token_info = get_token_info(new_token.get("access_token", ""))
 
             # check if "is_active" role is assigned to user
-            if KEYCLOAK_ROLE_IS_ACTIVE not in access_token_info.get(
+            if settings.KEYCLOAK_ROLE_IS_ACTIVE not in access_token_info.get(
                 "resource_access", {}
             ).get(config("KEYCLOAK_CLIENT_ID"), {}).get("roles", []):
                 return JsonResponse(
@@ -100,10 +92,10 @@ class Refresh(APIView):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.keycloak_client = KeycloakOpenID(
-            server_url=KEYCLOAK_SERVER_URL,
-            client_id=KEYCLOAK_CLIENT_ID,
-            realm_name=KEYCLOAK_REALM_NAME,
-            client_secret_key=KEYCLOAK_CLIENT_SECRET_KEY,
+            server_url=settings.KEYCLOAK_SERVER_URL,
+            client_id=settings.KEYCLOAK_CLIENT_ID,
+            realm_name=settings.KEYCLOAK_REALM_NAME,
+            client_secret_key=settings.KEYCLOAK_CLIENT_SECRET_KEY,
         )
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
@@ -136,10 +128,10 @@ def get_token_info(access_token: str) -> dict[str, Any]:
     """
 
     keycloak_client = KeycloakOpenID(
-        server_url=KEYCLOAK_SERVER_URL,
-        client_id=KEYCLOAK_CLIENT_ID,
-        realm_name=KEYCLOAK_REALM_NAME,
-        client_secret_key=KEYCLOAK_CLIENT_SECRET_KEY,
+        server_url=settings.KEYCLOAK_SERVER_URL,
+        client_id=settings.KEYCLOAK_CLIENT_ID,
+        realm_name=settings.KEYCLOAK_REALM_NAME,
+        client_secret_key=settings.KEYCLOAK_CLIENT_SECRET_KEY,
     )
     if not cache.get("keycloak_public_key"):
         cache.set(

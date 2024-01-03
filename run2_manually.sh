@@ -10,22 +10,18 @@ echo "from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     pass
-" >> project/apps/core/models.py
+" >> project/apps/user_auth/models.py
 
-# add core app + add to settings
-python manage.py startapp core project/apps/core
-sed -i '34i \    \"project.apps.core",' project/settings/settings.py
+python manage.py startapp user_auth project/apps/user_auth
 
-# oauth
-sed -i '34i \    \"oauth2_provider",' project/settings/settings.py
+echo "
+from .settings import INSTALLED_APPS
 
-# database migration
-echo 'AUTH_USER_MODEL = "core.USER"' >> project/settings/settings.py
-python manage.py makemigrations core
+INSTALLED_APPS += ['project.apps.user_auth']
+" >> project/settings/settings_user_auth.py
+
+
+echo 'AUTH_USER_MODEL = "user_auth.USER"' >> project/settings/settings.py
+
+python manage.py makemigrations user_auth
 python manage.py migrate
-python manage.py runserver
-
-# delete the current .git directory
-# start a new git and place .git directory in current directory
-
-# go to: https://django-oauth-toolkit.readthedocs.io/en/latest/getting_started.html

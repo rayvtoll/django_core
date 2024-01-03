@@ -1,10 +1,8 @@
-asgiref
 Django
 django-filter
-django-oauth-toolkit
 djangorestframework
 Markdown
+PyJWT
 python-decouple
+python-keycloak
 pytz
-sqlparse
-typing_extensions

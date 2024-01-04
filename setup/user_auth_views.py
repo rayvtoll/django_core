@@ -35,12 +35,15 @@ class KeycloakAuthRolesMixin:
 
         # bail if not all personal roles are in class attribute keycloak_roles for
         # requested method
-        if hasattr(self, "keycloak_roles") and not all(
-            i
-            in self.access_token_info.get("resource_access", {})
-            .get(settings.KEYCLOAK_CLIENT_ID, {})
-            .get("roles", [])
-            for i in self.keycloak_roles.get(request.method, [])
+        if hasattr(self, "keycloak_roles") and (
+            request.method not in self.keycloak_roles.keys()
+            or not all(
+                i
+                in self.access_token_info.get("resource_access", {})
+                .get(settings.KEYCLOAK_CLIENT_ID, {})
+                .get("roles", [])
+                for i in self.keycloak_roles.get(request.method, [])
+            )
         ):
             return JsonResponse(
                 {"detail": "You do not have the right role(s) for this view"},

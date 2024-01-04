@@ -1,6 +1,7 @@
 Django
 django-filter
 djangorestframework
+django-jazzmin
 Markdown
 PyJWT
 python-decouple

@@ -10,6 +10,7 @@ from .settings_database import *
 from .settings_cache import *
 from .settings_rest_framework import *
 from .settings_user_auth import *
+from .settings_jazzmin import *
 " >> project/settings/__init__.py
 mv project/settings.py project/settings/
 cp setup/settings_* project/settings/

@@ -1,13 +1,15 @@
 from decouple import config
 
 
+CACHE_LOCATION = config("CACHE_LOCATION")
+CACHE_TIMEOUT = config("CACHE_TIMEOUT", cast=int, default=300)
+CACHE_SIGNATURE = config("CACHE_SIGNATURE")
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": config("CACHE_LOCATION", "/tmp/django_cache"),
-        "TIMEOUT": config("CACHE_TIMEOUT", cast=int, default=300),
+        "LOCATION": CACHE_LOCATION,
+        "TIMEOUT": CACHE_TIMEOUT,
     }
 }
-CACHE_SIGNATURE = config(
-    "CACHE_SIGNATURE", "ReplaceThisStringInA.envFileBecauseThisIsNotSafe"
-)
+CACHE_SIGNATURE = CACHE_SIGNATURE

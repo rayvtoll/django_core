@@ -14,14 +14,16 @@ class User(AbstractUser):
 
 python manage.py startapp user_auth project/apps/user_auth
 
-echo "
+echo '
 from .settings import INSTALLED_APPS
+from .settings import MIDDLEWARE
 
-INSTALLED_APPS += ['project.apps.user_auth']
-" >> project/settings/settings_user_auth.py
+INSTALLED_APPS += ["project.apps.user_auth"]
+MIDDLEWARE += ["project.apps.user_auth.middleware.UserAuthMiddelware"]
 
+AUTH_USER_MODEL = "user_auth.USER"
 
-echo 'AUTH_USER_MODEL = "user_auth.USER"' >> project/settings/settings.py
+' >> project/settings/settings_user_auth.py
 
 python manage.py makemigrations user_auth
 python manage.py migrate

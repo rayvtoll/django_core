@@ -2,8 +2,9 @@ from django.urls import include, path
 from rest_framework import routers, serializers, viewsets
 
 from django.conf import settings
-from project.apps.user_auth.views import Login, Refresh, KeycloakAuthRolesMixin
-from project.apps.user_auth.models import User
+
+from .views import Login, Refresh
+from .models import User
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -20,12 +21,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class UserViewSet(KeycloakAuthRolesMixin, viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     keycloak_roles = {
         "GET": [settings.KEYCLOAK_BASIC_ROLE],
         "POST": [settings.KEYCLOAK_ELEVATED_ROLE],
+        "PATCH": [settings.KEYCLOAK_ELEVATED_ROLE],
     }
 
 

@@ -21,6 +21,8 @@ mkdir -p project/apps/user_auth
 cp setup/user_auth_views.py project/apps/user_auth/views.py
 cp setup/user_auth_urls.py project/apps/user_auth/urls.py
 cp setup/user_auth_admin.py project/apps/user_auth/admin.py
+cp setup/user_auth_middleware.py project/apps/user_auth/middleware.py
+cp setup/user_auth_helpers.py project/apps/user_auth/helpers.py
 
 # remove database lines from settings
 sed -i "73d;74d;75d;76d;77d;78d;79d;80d;81d;82d;83d" project/settings/settings.py

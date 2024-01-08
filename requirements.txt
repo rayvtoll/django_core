@@ -1,4 +1,4 @@
-asgiref==3.7.2
+asgiref==3.5
 certifi==2023.11.17
 charset-normalizer==3.3.2
 deprecation==2.1.0

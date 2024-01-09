@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from .helpers import get_token_info
 from .serializers import LoginSerializer
 
+
 class Login(APIView):
     """Returns keycloak token at successful login"""
 
@@ -34,7 +35,7 @@ class Login(APIView):
             new_token = self.keycloak_client.token(
                 username=serializer.data["username"],
                 password=serializer.data["password"],
-                totp=serializer.data.get("otp"),
+                totp=serializer.data.get("totp"),
             )
             access_token_info = get_token_info(new_token.get("access_token", ""))
 

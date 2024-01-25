@@ -3,7 +3,7 @@ from rest_framework import routers, serializers, viewsets
 
 from django.conf import settings
 
-from .views import Login, Refresh
+from .views import Login, Logout, Refresh
 from .models import User
 
 
@@ -28,6 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
         "GET": [settings.KEYCLOAK_BASIC_ROLE],
         "POST": [settings.KEYCLOAK_ELEVATED_ROLE],
         "PATCH": [settings.KEYCLOAK_ELEVATED_ROLE],
+        "PUT": [settings.KEYCLOAK_ELEVATED_ROLE],
     }
 
 
@@ -38,5 +39,6 @@ router.register(r"users", UserViewSet)
 urlpatterns = [
     path("", include(router.urls)),
     path("login/", Login.as_view(), name="login"),
+    path("logout/", Logout.as_view(), name="logout"),
     path("refresh_token/", Refresh.as_view(), name="refresh_token"),
 ]

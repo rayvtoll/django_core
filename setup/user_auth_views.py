@@ -1,31 +1,27 @@
 from decouple import config
-import json
-from keycloak import KeycloakOpenID, exceptions, KeycloakPostError
-from typing import Any
+from keycloak import KeycloakAuthenticationError, KeycloakPostError
 
 from django.conf import settings
+from django.contrib import auth
+from django.contrib.auth import logout
 from django.http import HttpResponse, JsonResponse
-from rest_framework.exceptions import NotAuthenticated
+from rest_framework.exceptions import (
+    APIException,
+    AuthenticationFailed,
+    NotAuthenticated,
+    ParseError,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .helpers import get_token_info
+from .helpers import UserAuthMixin
 from .serializers import LoginSerializer
 
 
-class Login(APIView):
-    """Returns keycloak token at successful login"""
+class Login(UserAuthMixin, APIView):
+    """Returns keycloak token + django session at successful login"""
 
     serializer_class = LoginSerializer
-
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.keycloak_client = KeycloakOpenID(
-            server_url=settings.KEYCLOAK_SERVER_URL,
-            client_id=settings.KEYCLOAK_CLIENT_ID,
-            realm_name=settings.KEYCLOAK_REALM_NAME,
-            client_secret_key=settings.KEYCLOAK_CLIENT_SECRET_KEY,
-        )
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
         serializer = self.serializer_class(data=request.data)
@@ -33,59 +29,57 @@ class Login(APIView):
 
         try:
             new_token = self.keycloak_client.token(
-                username=serializer.data["username"],
-                password=serializer.data["password"],
-                totp=serializer.data.get("totp"),
+                username=serializer.validated_data["username"],
+                password=serializer.validated_data["password"],
+                totp=serializer.validated_data.get("totp"),
             )
-            access_token_info = get_token_info(new_token.get("access_token", ""))
+            self.access_token = new_token.get("access_token", "")
 
             # check if "is_active" role is assigned to user
-            if settings.KEYCLOAK_ROLE_IS_ACTIVE not in access_token_info.get(
-                "resource_access", {}
-            ).get(config("KEYCLOAK_CLIENT_ID"), {}).get("roles", []):
-                return JsonResponse(
-                    {"detail": "User account is inactive"},
-                    status=NotAuthenticated.status_code,
-                )
 
-            return Response(data=new_token | access_token_info)
-        except exceptions.KeycloakAuthenticationError as e:
-            return Response(
-                data=json.loads(e.error_message.decode()), status=e.response_code
-            )
-        except exceptions.KeycloakPostError as e:
-            return Response(
-                data=json.loads(e.error_message.decode()), status=e.response_code
-            )
+            if settings.KEYCLOAK_ROLE_IS_ACTIVE not in self.roles:
+                raise NotAuthenticated(detail="User account is inactive")
+
+            auth.login(request, self.user)
+
+            return Response(data=new_token | self.access_token_info)
+        except KeycloakAuthenticationError as e:
+            raise AuthenticationFailed(detail=e)
+        except Exception as e:
+            raise APIException(detail=e)
 
 
-class Refresh(APIView):
+class Refresh(UserAuthMixin, APIView):
     """Returns a new token given refresh_token containing a new
     access_token / refresh_token"""
 
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.keycloak_client = KeycloakOpenID(
-            server_url=settings.KEYCLOAK_SERVER_URL,
-            client_id=settings.KEYCLOAK_CLIENT_ID,
-            realm_name=settings.KEYCLOAK_REALM_NAME,
-            client_secret_key=settings.KEYCLOAK_CLIENT_SECRET_KEY,
-        )
-
     def post(self, request, *args, **kwargs) -> HttpResponse:
         if "HTTP_AUTHORIZATION" not in request.META:
-            return JsonResponse(
-                {"detail": NotAuthenticated.default_detail},
-                status=NotAuthenticated.status_code,
-            )
+            raise NotAuthenticated()
 
         try:
             new_token = self.keycloak_client.refresh_token(
                 refresh_token=request.META["HTTP_AUTHORIZATION"].split("Bearer ")[-1]
             )
-            access_token_info = get_token_info(new_token.get("access_token", ""))
-            return Response(data=new_token | access_token_info)
+            self.access_token = new_token.get("access_token", "")
+            return Response(data=new_token | self.access_token_info)
         except KeycloakPostError as e:
-            return Response(
-                data=json.loads(e.error_message.decode()), status=e.response_code
-            )
+            raise ParseError(detail=e)
+        except Exception as e:
+            raise APIException(detail=e)
+
+
+class Logout(UserAuthMixin, APIView):
+    """Revokes access_token & refresh_token + end django session"""
+
+    def post(self, request: HttpResponse):
+        try:
+            refresh_token = request.META["HTTP_AUTHORIZATION"].split("Bearer ")[-1]
+            logout(request)
+            self.keycloak_client.logout(refresh_token)
+        except KeycloakPostError as e:
+            raise ParseError(detail=e)
+        except Exception as e:
+            raise APIException(detail=e, code=500)
+
+        return Response(data={"status": "logged out"})

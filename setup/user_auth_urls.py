@@ -25,10 +25,10 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     keycloak_roles = {
-        "GET": [settings.KEYCLOAK_BASIC_ROLE],
-        "POST": [settings.KEYCLOAK_ELEVATED_ROLE],
-        "PATCH": [settings.KEYCLOAK_ELEVATED_ROLE],
-        "PUT": [settings.KEYCLOAK_ELEVATED_ROLE],
+        "GET": [settings.KEYCLOAK_ROLE_BASIC],
+        "POST": [settings.KEYCLOAK_ROLE_ELEVATED],
+        "PATCH": [settings.KEYCLOAK_ROLE_ELEVATED],
+        "PUT": [settings.KEYCLOAK_ROLE_ELEVATED],
     }
 
 

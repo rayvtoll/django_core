@@ -11,10 +11,20 @@ from .settings_database import *
 from .settings_cache import *
 from .settings_rest_framework import *
 from .settings_user_auth import *
-" >> project/settings/__init__.py
+" > project/settings/__init__.py
 mv project/settings.py project/settings/
 cp setup/settings_* project/settings/
-cp setup/project_urls.py project/urls.py
+
+# project / urls files
+mkdir project/urls
+echo 'from django.urls import path, include
+
+urlpatterns = [
+    path("api/", include("project.urls.urls"))
+]
+' > project/urls/__init__.py
+rm project/urls.py
+cp setup/project_urls.py project/urls/urls.py
 
 # user_auth files
 mkdir -p project/apps/user_auth

@@ -14,7 +14,7 @@ pyasn1==0.5.1
 PyJWT==2.8.0
 python-decouple==3.8
 python-jose==3.3.0
-python-keycloak==3.9.0
+python-keycloak==3.9.1
 pytz==2024.1
 requests==2.31.0
 requests-toolbelt==1.0.0

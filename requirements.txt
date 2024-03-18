@@ -8,7 +8,7 @@ django-filter==23.5
 djangorestframework==3.14.0
 ecdsa==0.18.0
 idna==3.6
-Markdown==3.5.2
+Markdown==3.6
 packaging==23.2
 pyasn1==0.5.1
 PyJWT==2.8.0

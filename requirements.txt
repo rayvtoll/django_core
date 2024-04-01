@@ -4,7 +4,7 @@ charset-normalizer==3.3.2
 deprecation==2.1.0
 Django==5.0.3
 django-cors-headers==4.3.1
-django-filter==23.5
+django-filter==24.2
 djangorestframework==3.14.0
 ecdsa==0.18.0
 idna==3.6

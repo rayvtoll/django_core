@@ -9,7 +9,7 @@ djangorestframework==3.15.2
 ecdsa==0.19.0
 idna==3.7
 Markdown==3.7
-packaging==24.1
+packaging==24.2
 pyasn1==0.6.0
 PyJWT==2.10.1
 python-decouple==3.8
